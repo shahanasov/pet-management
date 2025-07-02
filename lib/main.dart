@@ -1,10 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:petadopt/data/services/model/adopt_model.dart';
 import 'package:petadopt/presentation/pages/home_page.dart';
-void main()async{
-  runApp(MyApp());
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(AdoptParentModelAdapter());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,9 +17,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(),
-    );
+    return GetMaterialApp(title: 'Own a Pet',
+      debugShowCheckedModeBanner: false, home: HomePage());
   }
 }

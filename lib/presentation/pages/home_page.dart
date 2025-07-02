@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:petadopt/data/services/model/controller.dart';
 import 'package:petadopt/presentation/pages/pet_adopt_form.dart';
-import 'package:petadopt/presentation/services/api_services.dart';
-import 'package:petadopt/presentation/services/model/pet_model.dart';
+import 'package:petadopt/data/services/api_services.dart';
+import 'package:petadopt/data/services/model/pet_model.dart';
 
 class HomeController extends GetxController {
   final ApiServices _apiServices = ApiServices();
@@ -50,7 +51,12 @@ class HomePage extends StatelessWidget {
           return Column(
             children: [
               GestureDetector(
-                onTap: () => Get.to(() => AdoptPage()),
+                onTap: () {
+                  if (!Get.isRegistered<AdoptController>()) {
+                    Get.put(AdoptController());
+                  }
+                  Get.to(() => AdoptPage());
+                },
                 child: Card(
                   elevation: 5,
                   color: Colors.white,

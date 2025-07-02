@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:petadopt/presentation/services/model/pet_model.dart';
+import 'package:petadopt/data/services/model/pet_model.dart';
 
 class ApiServices {
   final String apiUrl =

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petadopt/presentation/services/model/controller.dart';
-import 'package:petadopt/presentation/services/model/pet_model.dart';
+import 'package:petadopt/data/services/model/controller.dart';
+import 'package:petadopt/data/services/model/pet_model.dart';
 
 class AdoptPage extends StatelessWidget {
-  final AdoptController controller = Get.put(AdoptController());
-
+final AdoptController controller = Get.find<AdoptController>();
   AdoptPage({super.key});
-
+  final formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final genderController = TextEditingController();
+  final petController = TextEditingController();
+  final ageController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Adoption Form'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Adoption Form'), centerTitle: true),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -22,19 +22,22 @@ class AdoptPage extends StatelessWidget {
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              buildNameField(),
-              const SizedBox(height: 20),
-              buildAgeField(),
-              const SizedBox(height: 20),
-              buildGenderDropdown(),
-              const SizedBox(height: 20),
-              buildPetDropdown(),
-              const SizedBox(height: 30),
-              buildSubmitButton(),
-            ],
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buildNameField(),
+                const SizedBox(height: 20),
+                buildAgeField(),
+                const SizedBox(height: 20),
+                buildGenderDropdown(),
+                const SizedBox(height: 20),
+                buildPetDropdown(),
+                const SizedBox(height: 30),
+                buildSubmitButton(),
+              ],
+            ),
           ),
         );
       }),
@@ -43,11 +46,10 @@ class AdoptPage extends StatelessWidget {
 
   Widget buildNameField() {
     return TextFormField(
+      controller: nameController,
       decoration: InputDecoration(
         labelText: 'Your Name',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         prefixIcon: const Icon(Icons.person),
       ),
       onChanged: (value) => controller.name(value),
@@ -57,11 +59,10 @@ class AdoptPage extends StatelessWidget {
 
   Widget buildAgeField() {
     return TextFormField(
+      controller: ageController,
       decoration: InputDecoration(
         labelText: 'Your Age',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         prefixIcon: const Icon(Icons.cake),
       ),
       keyboardType: TextInputType.number,
@@ -72,20 +73,20 @@ class AdoptPage extends StatelessWidget {
 
   Widget buildGenderDropdown() {
     return DropdownButtonFormField<String>(
+      
       decoration: InputDecoration(
         labelText: 'Gender',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         prefixIcon: const Icon(Icons.transgender),
       ),
       value: controller.gender.value,
-      items: ['Male', 'Female', 'Other']
-          .map((gender) => DropdownMenuItem(
-                value: gender,
-                child: Text(gender),
-              ))
-          .toList(),
+      items:
+          ['Male', 'Female', 'Other']
+              .map(
+                (gender) =>
+                    DropdownMenuItem(value: gender, child: Text(gender)),
+              )
+              .toList(),
       onChanged: (value) => controller.gender(value!),
     );
   }
@@ -95,18 +96,17 @@ class AdoptPage extends StatelessWidget {
       return DropdownButtonFormField<PetModel>(
         decoration: InputDecoration(
           labelText: 'Select Pet',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           prefixIcon: const Icon(Icons.pets),
         ),
         value: controller.selectedPet.value,
-        items: controller.petsList.map((PetModel pet) {
-          return DropdownMenuItem<PetModel>(
-            value: pet,
-            child: Text(pet.petName),
-          );
-        }).toList(),
+        items:
+            controller.petsList.map((PetModel pet) {
+              return DropdownMenuItem<PetModel>(
+                value: pet,
+                child: Text(pet.petName),
+              );
+            }).toList(),
         onChanged: (PetModel? pet) => controller.selectedPet(pet),
         validator: (value) => value == null ? 'Please select a pet' : null,
       );
@@ -116,19 +116,29 @@ class AdoptPage extends StatelessWidget {
   Widget buildSubmitButton() {
     return Obx(() {
       return ElevatedButton(
-        onPressed: controller.isSubmitting.value ? null : controller.submitAdoption,
+       onPressed: controller.isSubmitting.value
+    ? null
+    : () async {
+        if (formKey.currentState!.validate()) {
+          await controller.submitAdoption(
+            name: nameController.text,
+            age: ageController.text,
+            gender: controller.gender.value,
+            petName: controller.selectedPet.value?.petName ?? '',
+          );
+        }
+      },
+
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: controller.isSubmitting.value
-            ? const CircularProgressIndicator(color: Colors.white)
-            : const Text(
-                'Submit Adoption',
-                style: TextStyle(fontSize: 16),
-              ),
+        child:
+            controller.isSubmitting.value
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text('Submit Adoption', style: TextStyle(fontSize: 16)),
       );
     });
   }
